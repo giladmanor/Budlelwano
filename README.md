@@ -1,21 +1,17 @@
-game manager:
-___
+**game manager:**
 * login via facebook/twitter
 * default personal settings
 * choose game theme
 * get code
 
-player:
-___
+**player:**
 * enter code
 
 
-both:
-___
-personal settings for game
+**both:**
+* personal settings for game
 
-play screens:
-___
+**play screens:**
 * throw dice
 * board view + scores
 * card view
