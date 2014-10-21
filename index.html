@@ -23,12 +23,15 @@
     </form>
     <script>
 	  var socket = io();
+	  var code = "YYY";
+	  socket.emit("register", code);
+	  
 	  $('form').submit(function(){
-	    socket.emit('chat message', $('#m').val());
+	    socket.emit(code, $('#m').val());
 	    $('#m').val('');
 	    return false;
 	  });
-	  socket.on('chat message', function(msg){
+	  socket.on(code, function(msg){
 	    $('#messages').append($('<li>').text(msg));
 	  });
 	</script>
