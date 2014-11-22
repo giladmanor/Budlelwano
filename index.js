@@ -6,9 +6,19 @@ var logic = require('./game_logic');
 db = require('./persistence');
 db.init(global);
 
+var card = require('./card');
 
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/card/', card.get_form);
+app.get('/card/:id', card.get_card);
+app.post('/card/', card.set_form);
+
+app.get('/card/:id', function (req, res) {
+  console.log('Get Card by ID',req.params);
+  res.send(req.params.id);
 });
 
 io.on('connection', function(socket) {
