@@ -31,11 +31,23 @@ io.on('connection', function(socket) {
 		console.log('user disconnected', u);
 	});
 
-	socket.on('register', function(code) {
+	socket.on('register', function(msg) {
+		var code = msg.code;
 		console.log('register: ', code);
 		gameObject = db.getGameObject(code);
+		gameObject.players = merge.recursive(true, gameObject.players, msg.player);
+		logic.setPlayerColors(gameObject);
+		if(gameObject.turn===""){
+			gameObject.turn = logic.nextTurn(gameObject);
+		}
+		
+		db.setGameObject(code,gameObject);
+		io.emit(code, gameObject);
+		console.log(code,gameObject);
+		console.log('---------------------');
+		
 		socket.on(code, function(msg) {
-			console.log(msg);
+			console.log(code,">>>",msg);
 			gameObject = db.getGameObject(code);
 
 			if (msg.event == "init") {
@@ -43,7 +55,7 @@ io.on('connection', function(socket) {
 				gameObject.board_id = msg.board_id;
 			} else if (msg.event == "done") {
 				gameObject.event.players.splice(gameObject.event.players.indexOf(msg.player), 1);
-			} else {
+			}  else {
 				gameObject.players = merge.recursive(true, gameObject.players, msg);
 				gameObject.event = logic.makeEvent(gameObject, msg);//calculateEvent(global[code], msg);
 			}
@@ -63,8 +75,7 @@ io.on('connection', function(socket) {
 			db.setGameObject(code,gameObject);
 			io.emit(code, gameObject);
 		});
-		db.setGameObject(code,gameObject);
-		io.emit(code, gameObject);
+		
 	});
 
 });

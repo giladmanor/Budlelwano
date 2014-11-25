@@ -5,7 +5,7 @@ module.exports = {
 		this.global = global;
 	},
 	getGameObject:function(code){
-		console.log(global[code]);
+		
 		return this.global[code] || {
 			turn : "",
 			players : {},

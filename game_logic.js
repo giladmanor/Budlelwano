@@ -1,4 +1,12 @@
 module.exports = {
+	setPlayerColors:function(gameObject){
+		console.log("colors");
+		var players = Object.keys(gameObject.players);
+		var colorArray=["#DF0101","#FF8000","#FFFF00","#80FF00","#088A4B","#00FFFF","#0080FF","#4000FF","#8000FF","#FF00FF","#FF0040","#FFFFFF","#848484","#2E2E2E"];
+		players.forEach(function(pk,i) {
+			gameObject.players[pk].color =  colorArray[i];
+		});
+	},
 	nextTurn : function(gameObject) {
 		var current = gameObject["turn"];
 		var players = Object.keys(gameObject.players);
