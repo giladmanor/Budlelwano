@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var Card = new Schema({
 	tags : [String],
 	equipment : [String],
-	tasks:[Schema.Types.Mixed],
+	tasks:[String],
 	
 });
 

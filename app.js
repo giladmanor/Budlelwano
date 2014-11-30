@@ -28,5 +28,5 @@ console.log('Magic happens on port 8080'); 			// shoutout to the user
 
 // First example router
 app.get('/', function(req, res) {
-  res.send("Bugger Arff!");
+	res.sendFile(__dirname + '/editor.html');
 });

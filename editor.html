@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Socket.IO chat</title>
+
+		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+	</head>
+	<body>
+		<table width="100%" border="1" style="position: absolute;bottom: 0;top: 0">
+			<thead>
+				<th >List</th>
+				<th>Editor</th>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="list"> </td>
+					<td class="editor"> </td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+</html>
+<script>
+	var getList = function(onSuccess) {
+		$.ajax({
+			type : "GET",
+			url : "/card",
+			crossDomain : true,
+			data : {},
+			dataType : 'json',
+			success : onSuccess,
+			error : function(e) {
+				alert('Something went working!');
+				console.log(e);
+			}
+		});
+	};
+	
+	getlist(function(res){
+		console.log(res);
+	});
+</script>
