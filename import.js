@@ -65,23 +65,51 @@ app.get('/import/:file_name', function(req, res) {
 		var row = line.split("\t");
 		var tags = row[0].split(",");
 		var equip = row[1].split(",");
-
+		var review = row[2];
+		var data = row[3].split(",");
 		var l = row.length;
-		var tasks = row.slice(2, l - 1);
+		var tasks = row.slice(4, l - 1);
 
-		var card = new Card({
-			tags : tags,
-			equipment : equip,
-			tasks : tasks
-		});
+		if (data.length > 1) {
+			console.log(data);
+			data.forEach(function(item) {
+				var n_task = [];
+				tasks.forEach(function(task) {
+					n_task.push(task.replace("{item}", item));
+				});
+				var card = new Card({
+					tags : tags,
+					equipment : equip,
+					review : review,
+					tasks : n_task
+				});
 
-		card.save(function(err) {
-			if (err) {
-				console.log('Error while saving tshirt: ' + err);
-			} else {
-				console.log("Card created");
-			}
-		});
+				card.save(function(err) {
+					if (err) {
+						console.log('Error while saving tshirt: ' + err);
+					} else {
+						console.log("Card created");
+					}
+				});
+
+			});
+		} else {
+			var card = new Card({
+				tags : tags,
+				equipment : equip,
+				review : review,
+				tasks : tasks
+			});
+
+			card.save(function(err) {
+				if (err) {
+					console.log('Error while saving tshirt: ' + err);
+				} else {
+					console.log("Card created");
+				}
+			});
+		}
+
 	});
 
 	res.send({

@@ -11,9 +11,13 @@ var methodOverride = require('method-override');
 app.use(bodyParser());
 app.use(methodOverride());
 
+/////////////////////////////////////////////////////////////////////////////
+
+
 var Card = require('./models/card.js');
 db = require('./persistence');
 db.init(global);
+
 
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
@@ -21,30 +25,30 @@ app.get('/', function(req, res) {
 
 app.post('/draw', function(req, res) {
 	console.log(req.body.tags);
-	var cards = db.getCard(req.body.tags, function(d) {
+	var cards = db.getCards(req.body.tags, function(d) {
 		res.send(d);
 	});
 	console.log(cards);
-
 });
 
 app.get('/taginate', function(req, res) {
 	Card.find(function(err, cards) {
 		if (!err) {
 			var tags = [];
+			var res=[];
 			cards.forEach(function(card) {
 				card.tags.forEach(function(tag) {
 					if (tags.indexOf(tag.trim()) == -1) {
 						tags.push(tag.trim());
+						res.push({name:tag.trim()});
 					}
 				});
 			});
-			fs.writeFile(__dirname + '/tags.json', JSON.stringify(tags), function(err) {
+			fs.writeFile(__dirname + '/tags.json', JSON.stringify(res), function(err) {
 				console.log(err);
 			});
 		}
 	});
-
 	res.send({
 		"result" : "OK"
 	});
@@ -55,7 +59,7 @@ app.get('/tags', function(req, res) {
 	res.sendFile(__dirname + '/tags.json');
 
 });
-
+////////////////////////////////////////////////////////////////////////////////////
 // MongoDB configuration
 mongoose.connect('mongodb://localhost/card', function(err, res) {
 	if (err) {
@@ -89,12 +93,20 @@ io.on('connection', function(socket) {
 		gameObject = db.getGameObject(code);
 		gameObject.players = merge.recursive(true, gameObject.players, msg.player);
 		logic.setPlayerColors(gameObject);
+		
 		if (gameObject.turn === "") {
 			gameObject.turn = logic.nextTurn(gameObject);
 
 			if (msg.tags) {
 				gameObject.tags = msg.tags;
-				gameObject.board_id = msg.board_id;
+				//gameObject.board_id = msg.board_id;
+				
+				db.getCards(gameObject.tags,function(cards){
+					cards.forEach(function(card){
+						gameObject.card_ids.push(card.id);
+					});
+				});
+				db.setGameObject(code, gameObject);
 			}
 		}
 
@@ -129,21 +141,48 @@ io.on('connection', function(socket) {
 				//we have an event
 				gameObject.last_turn = gameObject.turn;
 				gameObject.turn = "";
+				var random_index = Math.floor(Math.random()*gameObject.card_ids.length);
+				var card_id = gameObject.card_ids[random_index];
+				gameObject.card_ids.splice(random_index,1);
+				db.setGameObject(code, gameObject);
 
-				db.getCard(req.body.tags, function(d){
-					var card = d[0];
-					
+				db.getCard(card_id, function(card){
 					gameObject.event.card = card;
+					gameObject.event = renderEventTasks(gameObject.event,gameObject.players);					
 					emit(code, gameObject);
 				});
-
 			}
-
 		});
-
 	});
-
 });
+
+var renderEventTasks = function(event,players){
+	var participants = event.players;
+	var names = [];
+	participants,forEach(function(p){
+		names.push(players[p].name);
+	});
+	
+	var card = event.card;
+	var rendered_tasks = [];
+	
+	participants.forEach(function(player,i){
+		var task="";
+		if(i<event.taks.length){
+			task = card.tasks[i];
+		}else{
+			task = card.tasks[event.taks.length-1];
+		}
+		task = task.replace("{all}",names.join());
+		task = task.replace("{other}",names[1]);
+		task = task.replace("{first}",names[0]);
+		task = task.replace("{other+1}",names[(i+1) % names.length]);
+		task = task.replace("{others}",names.splice(1,names.length-1).join());
+		rendered_tasks.push(task);
+	});
+	event.tasks = rendered_tasks;
+	return event; 
+};
 
 http.listen(4000, function() {
 	console.log('listening on *:4000');

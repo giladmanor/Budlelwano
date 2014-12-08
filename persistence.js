@@ -18,10 +18,22 @@ module.exports = {
 	setGameObject:function(code,gameObject) {
 		this.global[code] = gameObject;
 	},
-	getCard:function(tags,finn){
+	getCards:function(tags,finn){
+		console.log("cards for tags",tags);
 		Card.find({ tags: { $in: tags }},function(err,cards){
+			if(err){
+				console.error(err);
+				finn([]);
+			}
+			
+			console.log("found",cards.length,"cards");
 			finn(cards);
 		});
 	},
+	getCard:function(id,finn){
+		Card.findById(id, function(err, card) {
+			finn(card);
+		});
+	}
 };
 
