@@ -18,10 +18,13 @@ var Card = require('./models/card.js');
 db = require('./persistence');
 db.init(global);
 
+/////////////////////////////////////////////////////////////////////////////
+// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD
+require('./board')(app);
+var Board = require('./models/board.js');
 
-app.get('/', function(req, res) {
-	res.sendFile(__dirname + '/index.html');
-});
+
+/////////////////////////////////////////////////////////////////////////////
 
 app.post('/draw', function(req, res) {
 	console.log(req.body.tags);
