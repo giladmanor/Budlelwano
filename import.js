@@ -27,7 +27,7 @@ mongoose.connect('mongodb://localhost/card', function(err, res) {
 	}
 });
 
-app.listen(8080);
+app.listen(4000);
 console.log('Magic happens on port 8080');
 // shoutout to the user
 
@@ -52,10 +52,10 @@ app.get('/purge', function(req, res) {
 	});
 });
 
-app.get('/import/:file_name', function(req, res) {
+app.get('/import', function(req, res) {
 
 	var rd = readline.createInterface({
-		input : fs.createReadStream('./' + req.params.file_name),
+		input : fs.createReadStream('./cards.tsv'),//' + req.params.file_name),
 		output : process.stdout,
 		terminal : false
 	});

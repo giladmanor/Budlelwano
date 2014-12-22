@@ -9,6 +9,7 @@ module.exports = {
 		
 		return this.global[code] || {
 			turn : "",
+			status : "turnover",
 			players : {},
 			event : {},
 			tags : [],

@@ -1,0 +1,22 @@
+kissing		make noises of kissing every time you see someone kiss		kiss {other+1}	
+social	blanket	{all} will stay under a blanket untill next turn		stay under a blanket untill your next turn, with {others}	
+social	drinks	drink round		Make {others length} cocktails and secretly add to half of them some alcohole. {others} will choose drink and the all of you drink up	{first} will make drinks. choose the one you will drink and you both drink up.
+social				walk around the group and look each on in the eyes and tell them how much you love them	
+social	drinks			last one to turn off the light drinks a shot of vodka	
+social				Switch an item of cloth with {other+1}	
+kissing	ice			pass an ice cube to {other+1} with your mouth 	
+social				sing a love song to {others}	{first} will sing you a love song, try to make {first} laugh
+social		{all} have to pantomime a food, try to guess what it is	bathtub, couch, screen, confetti, solid,prophet, Calm,Ego,Envy,Evil,Generosity,Honor ,Humility,Loyalty,Sanity,Sensitivity,Talent,Wisdom	pantomime the word: {item}	
+social		{all} have to pantomime a name of a place, try to guess what it is	a Sloth,Zebra,a Wombat,a Tasmanian Devil,a Tapir,Rhinoceros,a Parrot,a Naked Mole-rat,a Meerkat,a Lynx,a Ladybug,a Koala,a Kiwi,a Hippo,a Flamingo,an Armadillo,a Bee,a Dung Beetle	pantomime the word: {item}	
+roleplay				breake up with {other} without using the word {item} 	{first} is breaking up with you, try making him say {item}
+roleplay			I,Marry,Me,Ring	ask {other} hand without saying {item}	{first} is asking your hand in marrige, try to make him say {item}
+social	food, blindfolds			feed {other+1} when you are blindfolded	
+social				you and {others} each in tern have to say a sentance starting with a, b, c .. about breaking up	
+social				dance a sexy dance with {others}	
+social			an elephant,a cow,a dog,a cat,a fish,a turtle,a hourse	make a noise of {item} for a minute	
+social				ask {other+1} a very personal question	asnwer the question from {first}
+roleplay				you are a mother, {other} is your doughter is leaving home.	you are a teanager leaving home, {first} is your mother
+roleplay				you are a man, asking your wife {other} to open ip your relationship	you are a wife, {first} your husband wants yo open your maridge and have sex with others
+roleplay				you are a woman, tell your husband {other} why you cant give him a BJ	{first}, your wife, is excusing why she cant give you a BJ
+roleplay				you are a parent, perswaid your chiled {other} to leave his/her lover	{first}, your parent is trying to make you leave your lover
+social		take lots of pictures	a Sloth,Zebra,a Wombat,a Tasmanian Devil,a Tapir,Rhinoceros,a Parrot,a Naked Mole-rat,a Meerkat,a Lynx,a Ladybug,a Koala,a Kiwi,a Hippo,a Flamingo,an Armadillo,a Bee,a Dung Beetle	join {others} to constuct {item}	

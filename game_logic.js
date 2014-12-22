@@ -7,6 +7,18 @@ module.exports = {
 			gameObject.players[pk].color =  colorArray[i];
 		});
 	},
+	switchBoard:function(gameObject,success){
+		var Board = require('./models/board.js');
+		
+		Board.find(function(err, items) {
+			if (!err) {
+				var val = Math.floor((Math.random() * items.length));
+				success(items[val]);
+			} else {
+				console.log('Internal error(%d): %s', res.statusCode, err.message);
+			}
+		});
+	},
 	nextTurn : function(gameObject) {
 		var current = gameObject["turn"];
 		var players = Object.keys(gameObject.players);
@@ -18,6 +30,7 @@ module.exports = {
 		return players[i];
 	},
 	makeEvent : function(gameObject, lastPlayer) {
+		
 		var lastPlayerKey = Object.keys(lastPlayer)[0];
 		var loc = lastPlayer[lastPlayerKey].location;
 		var players = Object.keys(gameObject.players);
@@ -39,10 +52,12 @@ module.exports = {
 			});
 			if (candidates.length > 1) {
 				console.log("-- Casos Beli --");
+				gameObject.status = "event";
 				event.players = candidates;
 			}
 		}
+		gameObject.event = event;
 
-		return event;
+		return gameObject;
 	}
 };
