@@ -3,6 +3,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var merge = require('merge');
 var logic = require('./game_logic');
+var Game = require('./Game');
 var fs = require('fs');
 
 var mongoose = require("mongoose");
@@ -93,53 +94,45 @@ io.on('connection', function(socket) {
 	socket.on('register', function(msg) {
 		var code = msg.code;
 		console.log('register: ', code);
-		gameObject = db.getGameObject(code);
-		gameObject.players = merge.recursive(true, gameObject.players, msg.player);
-		logic.setPlayerColors(gameObject);
+
+		gameObject = new Game(io, global, code);
+		gameObject.register(msg.player);
 
 		if (gameObject.turn === "") {
-			gameObject.turn = logic.nextTurn(gameObject);
+			gameObject.turn();
 
 			if (msg.tags) {
-				gameObject.tags = msg.tags;
-				//gameObject.board_id = msg.board_id;
-
-				db.getCards(gameObject.tags, function(cards) {
-					cards.forEach(function(card) {
-						gameObject.card_ids.push(card.id);
-					});
-				});
-				db.setGameObject(code, gameObject);
+				gameObject.setTags = msg.tags;
 			}
 		}
 
-		db.setGameObject(code, gameObject);
-		io.emit(code, gameObject);
-		console.log(code, gameObject);
+		gameObject.save();
+		gameObject.emit();
+		
 		console.log('---------------------');
 
 		socket.on(code, function(msg) {
-			gameObject = db.getGameObject(code);
-			console.log(code, ">>> [",gameObject.status ,"]",msg);
-			
+			gameObject = new Game(io, global, code);
+			console.log(code, ">>> [", gameObject.status, "]", msg);
 
 			if (gameObject.status === "event") {
 				if (msg.event == "done") {
 					gameObject.event.players.splice(gameObject.event.players.indexOf(msg.player), 1);
-					
+
 					if (gameObject.event.players.length == 0) {
 						//end of event
 						gameObject.status = "turnover";
 						gameObject.turn = gameObject.last_turn;
 						gameObject.last_turn = "";
-						
+
 						gameObject.turn = logic.nextTurn(gameObject);
 						emit(code, gameObject);
-						
-					}else{}
+
+					} else {
+					}
 					return;
 				}
-			}else{
+			} else {
 				gameObject.players = merge.recursive(true, gameObject.players, msg);
 				gameObject = logic.makeEvent(gameObject, msg);
 			}
@@ -155,11 +148,11 @@ io.on('connection', function(socket) {
 					gameObject.event = renderEventTasks(gameObject.event, gameObject.players);
 					emit(code, gameObject);
 				});
-			}else{
+			} else {
 				gameObject.turn = logic.nextTurn(gameObject);
 				emit(code, gameObject);
 			}
-			
+
 		});
 	});
 });
@@ -172,7 +165,7 @@ var renderEventTasks = function(event, players) {
 	});
 
 	var card = event.card;
-	
+
 	var rendered_tasks = [];
 	participants.forEach(function(player, i) {
 		var task = "";
