@@ -18,6 +18,79 @@ var Card = require('./models/card.js');
 db = require('./persistence');
 db.init(global);
 
+app.post('/cards', function(req, res) {
+	var tags = req.body.tags;
+	console.log("cards for tags", tags);
+	Card.find({
+		tags : {
+			$in : tags
+		}
+	}, function(err, cards) {
+		if (err) {
+			console.error(err);
+			res.send([]);
+		}
+
+		console.log("found", cards.length, "cards");
+		res.send(cards);
+	});
+
+});
+
+app.get('/card/:id', function(req, res) {
+	var id = req.params.id;
+	Card.findById(id, function(err, card) {
+		res.send(card);
+	});
+});
+
+app.post('/card/set', function(req, res) {
+
+	Card.findById(req.params.id, function(err, card) {
+
+		if (!card) {
+			res.statusCode = 404;
+			return res.send({
+				error : 'Not found'
+			});
+		}
+
+		if (req.body.tags != null)
+			card.tags = req.body.tags;
+		if (req.body.equipment != null)
+			card.equipment = req.body.equipment;
+		if (req.body.tasks != null)
+			card.tasks = req.body.tasks;
+
+		return card.save(function(err) {
+			if (!err) {
+				console.log('Updated');
+				return res.send({
+					status : 'OK',
+					card : card
+				});
+			} else {
+				if (err.name == 'ValidationError') {
+					res.statusCode = 400;
+					res.send({
+						error : 'Validation error'
+					});
+				} else {
+					res.statusCode = 500;
+					res.send({
+						error : 'Server error'
+					});
+				}
+				console.log('Internal error(%d): %s', res.statusCode, err.message);
+			}
+
+			res.send(card);
+
+		});
+	});
+
+});
+
 /////////////////////////////////////////////////////////////////////////////
 // BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD// BOARD
 require('./board')(app);
@@ -108,7 +181,7 @@ io.on('connection', function(socket) {
 
 		gameObject.save();
 		gameObject.emit();
-		
+
 		console.log('---------------------');
 
 		socket.on(code, function(msg) {
@@ -134,56 +207,19 @@ io.on('connection', function(socket) {
 				}
 			} else {
 				gameObject.players = merge.recursive(true, gameObject.players, msg);
-				gameObject = logic.makeEvent(gameObject, msg);
-			}
+				if (gameObject.makeEvent(msg)) {
 
-			if (gameObject.status === "event") {
-				//we have an event
-				var random_index = Math.floor(Math.random() * gameObject.card_ids.length);
-				var card_id = gameObject.card_ids[random_index];
-				gameObject.card_ids.splice(random_index, 1);
-				db.setGameObject(code, gameObject);
-				db.getCard(card_id, function(card) {
-					gameObject.event.card = card;
-					gameObject.event = renderEventTasks(gameObject.event, gameObject.players);
-					emit(code, gameObject);
-				});
-			} else {
-				gameObject.turn = logic.nextTurn(gameObject);
-				emit(code, gameObject);
+				} else {
+					gameObject.turn = logic.nextTurn(gameObject);
+					gameObject.save();
+					gameObject.emit();
+				}
+
 			}
 
 		});
 	});
 });
-
-var renderEventTasks = function(event, players) {
-	var participants = event.players;
-	var names = [];
-	participants.forEach(function(p) {
-		names.push(players[p].name ? players[p].name : "jack");
-	});
-
-	var card = event.card;
-
-	var rendered_tasks = [];
-	participants.forEach(function(player, i) {
-		var task = "";
-		if (i < card.tasks.length) {
-			task = card.tasks[i];
-		} else {
-			task = card.tasks[card.tasks.length - 1];
-		}
-		task = task.replace("{all}", names.join());
-		task = task.replace("{other}", names[1]);
-		task = task.replace("{first}", names[0]);
-		task = task.replace("{other+1}", names[(i + 1) % names.length]);
-		task = task.replace("{others}", names.splice(1, names.length - 1).join());
-		rendered_tasks.push(task);
-	});
-	card.tasks = rendered_tasks;
-	return event;
-};
 
 http.listen(4000, function() {
 	console.log('listening on *:4000');

@@ -65,48 +65,92 @@ function Game(io, global, code) {
 		});
 	};
 
-	
+	function getCard(id, finn) {
+		Card.findById(id, function(err, card) {
+			finn(card);
+		});
+	}
 
-	this.makeEvent = function() {
-		
-		
-		var lastPlayerKey = Object.keys(lastPlayer)[0];
+	var renderEventTasks = function(event, players) {
+		var participants = event.players;
+		var names = [];
+		participants.forEach(function(p) {
+			names.push(players[p].name ? players[p].name : "jack");
+		});
+
+		var card = event.card;
+
+		var rendered_tasks = [];
+		participants.forEach(function(player, i) {
+			var task = "";
+			if (i < card.tasks.length) {
+				task = card.tasks[i];
+			} else {
+				task = card.tasks[card.tasks.length - 1];
+			}
+			task = task.replace("{all}", names.join());
+			task = task.replace("{other}", names[1]);
+			task = task.replace("{first}", names[0]);
+			task = task.replace("{other+1}", names[(i + 1) % names.length]);
+			task = task.replace("{others}", names.splice(1, names.length - 1).join());
+			rendered_tasks.push(task);
+		});
+		card.tasks = rendered_tasks;
+		return event;
+	};
+
+	function populateEvent(event) {
+
+		var random_index = Math.floor(Math.random() * this.data.card_ids.length);
+		var card_id = this.data.card_ids[random_index];
+		this.data.card_ids.splice(random_index, 1);
+		getCard(card_id, function(card) {
+			this.data.event.card = card;
+			this.data.event = renderEventTasks(event, this.data.players);
+			this.emit();
+		});
+
+		return event;
+	};
+
+	this.makeEvent = function(lastPlayerKey) {
+
 		var loc = lastPlayer[lastPlayerKey].location;
-		var players = Object.keys(gameObject.players);
-		
-		if (this.data.round % players.length == 0){}
-		
-		
+		var players = Object.keys(this.data.players);
+
 		var event = {
 			players : []
 		};
-		var candidates = [];
+		this.data.event = event;
 
-		var locsum = 0;
-		players.forEach(function(pk) {
-			locsum += gameObject.players[pk].location;
-		});
+		if (this.data.round % players.length == 0 && loc == 0) {
+			return flase;
+		} else {
+			var candidates = [];
 
-		if (locsum > 0) {
 			players.forEach(function(pk) {
-				if (loc == gameObject.players[pk].location) {
+				if (loc == this.data.players[pk].location) {
 					candidates.push(pk);
 				}
 			});
+
 			if (candidates.length > 1) {
 				console.log("-- Casos Beli --");
-				gameObject.status = "event";
+				this.data.status = "event";
 				event.players = candidates;
+
+				this.data.event = populateEvent(event);
+
+				return true;
+			} else {
+				return false;
 			}
 		}
-		gameObject.event = event;
-
-		return gameObject;
 	};
-	
+
 	this.accept = function(msg) {
 		this.data.players = merge.recursive(true, this.data.players, msg);
-		this.data.round = this.data.round +1; 
+		this.data.round = this.data.round + 1;
 	};
 
 	this.turn = function() {
@@ -123,12 +167,6 @@ function Game(io, global, code) {
 	this.status = function() {
 		return this.data.status;
 	};
-}
-
-function getCard(id, finn) {
-	Card.findById(id, function(err, card) {
-		finn(card);
-	});
 }
 
 ///////////////////////////////////////////////////////////
